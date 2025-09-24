@@ -43,7 +43,18 @@ void displayStudents(const std::vector<Student>& database) {
     }
 }
 
-// Функция для удаления студента из базы данных
+// Удобная функция для удаления по имени (без cin/cout, для тестов)
+bool removeStudentByName(std::vector<Student>& database, const std::string& name) {
+    for (auto it = database.begin(); it != database.end(); ++it) {
+        if (it->name == name) {
+            database.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+// Старая функция для меню (использует ввод/вывод)
 void deleteStudent(std::vector<Student>& database) {
     if (database.empty()) {
         std::cout << "База данных пуста. Удалять нечего.\n";
@@ -53,78 +64,91 @@ void deleteStudent(std::vector<Student>& database) {
     std::cout << "Введите имя студента для удаления: ";
     std::cin >> name;
 
-    bool found = false;
-    for (auto it = database.begin(); it != database.end(); ++it) {
-        if (it->name == name) {
-            database.erase(it);
-            std::cout << "Студент " << name << " удалён из базы данных.\n";
-            found = true;
-            break;
-        }
-    }
-
-    if (!found) {
+    if (removeStudentByName(database, name)) {
+        std::cout << "Студент " << name << " удалён из базы данных.\n";
+    } else {
         std::cout << "Студент с именем " << name << " не найден.\n";
     }
 }
 
-Student findStudentWithMinAge(const std::vector<Student>& database) {
-    if (database.empty()) throw std::runtime_error("База данных пуста");
-    return *std::min_element(database.begin(), database.end(),
-                             [](const Student& a, const Student& b) { return a.age < b.age; });
+// ---------------- Тесты ----------------
+TEST(StudentTests, AddStudentToDatabase) {
+    std::vector<Student> database;
+    database.push_back({"Ivan", 19, "IT", 4.3});
+    EXPECT_EQ(database.size(), 1);
+    EXPECT_EQ(database[0].name, "Ivan");
 }
 
-Student findStudentWithMaxAge(const std::vector<Student>& database) {
-    if (database.empty()) throw std::runtime_error("База данных пуста");
-    return *std::max_element(database.begin(), database.end(),
-                             [](const Student& a, const Student& b) { return a.age < b.age; });
-}
-
-// Тесты
-TEST(StudentTests, MinAgeStudent) {
+TEST(StudentTests, RemoveExistingStudent) {
     std::vector<Student> database = {
         {"Ivan", 19, "IT", 4.3},
-        {"Anna", 22, "Math", 4.8},
-        {"Petr", 18, "Physics", 3.9}
+        {"Anna", 20, "Math", 4.5}
     };
-    Student result = findStudentWithMinAge(database);
-    EXPECT_EQ(result.name, "Petr");
-    EXPECT_EQ(result.age, 18);
+    bool removed = removeStudentByName(database, "Ivan");
+    EXPECT_TRUE(removed);
+    EXPECT_EQ(database.size(), 1);
+    EXPECT_EQ(database[0].name, "Anna");
 }
 
-TEST(StudentTests, MaxAgeStudent) {
+TEST(StudentTests, RemoveNonExistingStudent) {
+    std::vector<Student> database = {
+        {"Ivan", 19, "IT", 4.3}
+    };
+    bool removed = removeStudentByName(database, "Petr");
+    EXPECT_FALSE(removed);
+    EXPECT_EQ(database.size(), 1);
+}
+
+TEST(StudentTests, RemoveFromEmptyDatabase) {
+    std::vector<Student> database;
+    bool removed = removeStudentByName(database, "Ivan");
+    EXPECT_FALSE(removed);
+    EXPECT_TRUE(database.empty());
+}
+
+TEST(StudentTests, RemoveOneOfDuplicates) {
     std::vector<Student> database = {
         {"Ivan", 19, "IT", 4.3},
-        {"Anna", 22, "Math", 4.8},
-        {"Petr", 18, "Physics", 3.9}
+        {"Ivan", 20, "Math", 4.0},
+        {"Anna", 21, "Physics", 4.7}
     };
-    Student result = findStudentWithMaxAge(database);
-    EXPECT_EQ(result.name, "Anna");
-    EXPECT_EQ(result.age, 22);
+    bool removed = removeStudentByName(database, "Ivan");
+    EXPECT_TRUE(removed);
+    EXPECT_EQ(database.size(), 2);
+    EXPECT_EQ(database[0].name, "Ivan"); // остался второй Иван
 }
 
-TEST(StudentTests, MinAgeEmptyDatabase) {
-    std::vector<Student> database;
-    EXPECT_THROW(findStudentWithMinAge(database), std::runtime_error);
-}
-
-TEST(StudentTests, MaxAgeEmptyDatabase) {
-    std::vector<Student> database;
-    EXPECT_THROW(findStudentWithMaxAge(database), std::runtime_error);
-}
-
-TEST(StudentTests, SameAgeStudents) {
+TEST(StudentTests, RemoveAllByMultipleCalls) {
     std::vector<Student> database = {
-        {"Ivan", 20, "IT", 4.0},
-        {"Anna", 20, "Math", 4.1},
-        {"Petr", 20, "Physics", 3.9}
+        {"Ivan", 19, "IT", 4.3},
+        {"Ivan", 20, "Math", 4.0}
     };
-    Student min_result = findStudentWithMinAge(database);
-    Student max_result = findStudentWithMaxAge(database);
-    EXPECT_EQ(min_result.age, 20);
-    EXPECT_EQ(max_result.age, 20);
+    EXPECT_TRUE(removeStudentByName(database, "Ivan"));
+    EXPECT_TRUE(removeStudentByName(database, "Ivan"));
+    EXPECT_TRUE(database.empty());
 }
 
+TEST(StudentTests, RemoveLastStudent) {
+    std::vector<Student> database = {
+        {"Anna", 21, "Physics", 4.7}
+    };
+    EXPECT_TRUE(removeStudentByName(database, "Anna"));
+    EXPECT_TRUE(database.empty());
+}
+
+TEST(StudentTests, RemoveDoesNotAffectOtherStudents) {
+    std::vector<Student> database = {
+        {"Ivan", 19, "IT", 4.3},
+        {"Anna", 20, "Math", 4.5},
+        {"Petr", 21, "Physics", 3.9}
+    };
+    EXPECT_TRUE(removeStudentByName(database, "Anna"));
+    EXPECT_EQ(database.size(), 2);
+    EXPECT_EQ(database[0].name, "Ivan");
+    EXPECT_EQ(database[1].name, "Petr");
+}
+
+// ---------------- Меню ----------------
 void view() {
     std::vector<Student> database;
 
