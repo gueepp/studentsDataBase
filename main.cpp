@@ -10,7 +10,7 @@ struct Student {
     int age;
     std::string major;
     double gpa;
-};сыс
+};
 
 // Функция для добавления студента в базу данных
 void addStudent(std::vector<Student>& database) {
