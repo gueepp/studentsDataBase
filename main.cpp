@@ -125,16 +125,6 @@ TEST(StudentTests, SameAgeStudents) {
     EXPECT_EQ(max_result.age, 20);
 }
 
-int main(int argc, char **argv) {
-    if (argc > 1) {
-        ::testing::InitGoogleTest(&argc, argv);
-        return RUN_ALL_TESTS();
-    } else {
-        view();
-        return 0;
-    }
-}
-
 void view() {
     std::vector<Student> database;
 
@@ -165,4 +155,14 @@ void view() {
                 std::cout << "Неверный выбор. Попробуйте снова.\n";
         }
     } while (choice != 0);
+}
+
+int main(int argc, char **argv) {
+    if (argc > 1) {
+        ::testing::InitGoogleTest(&argc, argv);
+        return RUN_ALL_TESTS();
+    } else {
+        view();
+        return 0;
+    }
 }
