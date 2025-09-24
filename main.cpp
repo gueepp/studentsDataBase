@@ -92,6 +92,17 @@ TEST(StudentTests, MinAgeStudent) {
     EXPECT_EQ(result.age, 18);
 }
 
+TEST(StudentTests, MaxAgeStudent) {
+    std::vector<Student> database = {
+        {"Ivan", 19, "IT", 4.3},
+        {"Anna", 22, "Math", 4.8},
+        {"Petr", 18, "Physics", 3.9}
+    };
+    Student result = findStudentWithMaxAge(database);
+    EXPECT_EQ(result.name, "Anna");
+    EXPECT_EQ(result.age, 22);
+}
+
 int main(int argc, char **argv) {
     if (argc > 1) {
         ::testing::InitGoogleTest(&argc, argv);
