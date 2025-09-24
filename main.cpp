@@ -108,6 +108,11 @@ TEST(StudentTests, MinAgeEmptyDatabase) {
     EXPECT_THROW(findStudentWithMinAge(database), std::runtime_error);
 }
 
+TEST(StudentTests, MaxAgeEmptyDatabase) {
+    std::vector<Student> database;
+    EXPECT_THROW(findStudentWithMaxAge(database), std::runtime_error);
+}
+
 int main(int argc, char **argv) {
     if (argc > 1) {
         ::testing::InitGoogleTest(&argc, argv);
