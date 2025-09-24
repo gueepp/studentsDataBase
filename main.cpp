@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <gtest/gtest.h>
+#include <stdexcept>
+#include <algorithm>
 
 struct Student {
     std::string name;
@@ -65,7 +68,41 @@ void deleteStudent(std::vector<Student>& database) {
     }
 }
 
-int main() {
+Student findStudentWithMinAge(const std::vector<Student>& database) {
+    if (database.empty()) throw std::runtime_error("База данных пуста");
+    return *std::min_element(database.begin(), database.end(),
+                             [](const Student& a, const Student& b) { return a.age < b.age; });
+}
+
+Student findStudentWithMaxAge(const std::vector<Student>& database) {
+    if (database.empty()) throw std::runtime_error("База данных пуста");
+    return *std::max_element(database.begin(), database.end(),
+                             [](const Student& a, const Student& b) { return a.age < b.age; });
+}
+
+// Тесты
+TEST(StudentTests, MinAgeStudent) {
+    std::vector<Student> database = {
+        {"Ivan", 19, "IT", 4.3},
+        {"Anna", 22, "Math", 4.8},
+        {"Petr", 18, "Physics", 3.9}
+    };
+    Student result = findStudentWithMinAge(database);
+    EXPECT_EQ(result.name, "Petr");
+    EXPECT_EQ(result.age, 18);
+}
+
+int main(int argc, char **argv) {
+    if (argc > 1) {
+        ::testing::InitGoogleTest(&argc, argv);
+        return RUN_ALL_TESTS();
+    } else {
+        view();
+        return 0;
+    }
+}
+
+void view() {
     std::vector<Student> database;
 
     int choice;
@@ -73,6 +110,7 @@ int main() {
         std::cout << "Меню:\n";
         std::cout << "1. Добавить студента\n";
         std::cout << "2. Вывести список студентов\n";
+        std::cout << "3. Удалить студента\n";
         std::cout << "0. Выход\n";
         std::cout << "Выберите действие: ";
         std::cin >> choice;
@@ -94,6 +132,4 @@ int main() {
                 std::cout << "Неверный выбор. Попробуйте снова.\n";
         }
     } while (choice != 0);
-
-    return 0;
 }
