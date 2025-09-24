@@ -7,7 +7,7 @@ struct Student {
     int age;
     std::string major;
     double gpa;
-};
+};сыс
 
 // Функция для добавления студента в базу данных
 void addStudent(std::vector<Student>& database) {
@@ -36,6 +36,31 @@ void displayStudents(const std::vector<Student>& database) {
     }
 }
 
+// Функция для удаления студента из базы данных
+void deleteStudent(std::vector<Student>& database) {
+    if (database.empty()) {
+        std::cout << "База данных пуста. Удалять нечего.\n";
+        return;
+    }
+    std::string name;
+    std::cout << "Введите имя студента для удаления: ";
+    std::cin >> name;
+
+    bool found = false;
+    for (auto it = database.begin(); it != database.end(); ++it) {
+        if (it->name == name) {
+            database.erase(it);
+            std::cout << "Студент " << name << " удалён из базы данных.\n";
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        std::cout << "Студент с именем " << name << " не найден.\n";
+    }
+}
+
 int main() {
     std::vector<Student> database;
 
@@ -54,6 +79,9 @@ int main() {
                 break;
             case 2:
                 displayStudents(database);
+                break;
+            case 3:
+                deleteStudent(database);
                 break;
             case 0:
                 std::cout << "Выход из программы.\n";
